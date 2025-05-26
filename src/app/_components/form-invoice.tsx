@@ -155,17 +155,13 @@ export default function MyForm() {
                       try {
                         setLoading(true);
                         const result = await checkTaxCode(field.value, form.getValues("partnerCode"));
-                        if (result.code === "00") {
-                          const data = result.data;
+                        if (!result) return; // Early return if there was an error
 
-                          form.setValue("taxCode", data.taxCode);
-                          form.setValue("fullName", data.fullName || "");
-                          form.setValue("address", data.addressLine || "");
+                        form.setValue("taxCode", result.data?.taxCode || "");
+                        form.setValue("fullName", result.data?.fullName || "");
+                        form.setValue("address", result.data?.addressLine || "");
 
-                          toast.success("Đã lấy thông tin từ mã số thuế.");
-                        } else {
-                          toast.error("Không tìm thấy mã số thuế.");
-                        }
+                        toast.success("Đã lấy thông tin từ mã số thuế.");
                       } catch (error) {
                         console.error(error);
                         toast.error("Lỗi khi kiểm tra mã số thuế.");
@@ -269,8 +265,17 @@ export default function MyForm() {
 
 // ✅ Gọi API check mã số thuế
 const checkTaxCode = async (taxCode: string, partnerCode: string) => {
-  const url = `https://admin.invoice.reso.vn/api/v1/tax-code/${taxCode}?partnerCode=${partnerCode}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Không thể kiểm tra mã số thuế.");
-  return response.json();
+  const url = `${process.env.NEXT_PUBLIC_INVOICE_ENDPOINT}/tax-code/${taxCode}?partnerCode=${partnerCode}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) {
+      toast.error(data.message);
+      return;
+    }
+    return data;
+  } catch (error) {
+    console.error(error);
+    toast.error("Lỗi khi kiểm tra mã số thuế");
+  }
 };
