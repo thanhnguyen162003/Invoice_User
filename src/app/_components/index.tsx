@@ -25,10 +25,10 @@ const PageIndex = () => {
           </div>
         </div> */}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left section - Form */}
-          <div className="w-full lg:w-full">
-            <div className=" p-4">
+          <div className="w-full">
+            <div className="p-4">
               <div className="flex items-center gap-2 mb-6">
                 <Receipt className="w-6 h-6 text-amber-700" />
                 <h1 className="text-2xl font-semibold text-amber-900">
@@ -54,15 +54,15 @@ const PageIndex = () => {
             </div>
           </div>
 
-          {/* Right section - Image and Info */}
-          <div className="w-full lg:w-full space-y-8">
-            <div className="relative w-full h-[calc(100vh-5rem)] rounded-2xl shadow-xl overflow-hidden">
+          {/* Right section - Image */}
+          <div className="w-full">
+            <div className="relative w-full h-full min-h-[600px] rounded-2xl shadow-xl overflow-hidden">
               <Image
                 src="/images/logo-v2.png"
                 alt="Passio Coffee"
-                layout="fill"
-                objectFit="cover"
-                className="rounded-2xl"
+                fill
+                className="object-cover rounded-2xl"
+                priority
               />
             </div>
           </div>
