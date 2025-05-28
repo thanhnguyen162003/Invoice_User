@@ -1,50 +1,49 @@
-"use server";
+"use client";
 
 import invoiceSchema, { InvoiceResponseSchema } from "@/schemas/invoice.schema";
 import { z } from "zod";
+import axios from "axios";
 
 import { baseURL } from "@/lib/config";
+
+const api = axios.create({
+  baseURL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const createInvoice = async (
   invoiceData: z.infer<typeof invoiceSchema>
 ) => {
   try {
-    const response = await fetch(`${baseURL}/invoices`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(invoiceData),
-    });
-    const responseData = await response.json();
-
+    console.log("baseURL", baseURL);
+    const response = await api.post("/invoices", invoiceData);
     return {
-      data: responseData,
+      data: response.data,
       status: response.status,
     };
   } catch (e) {
-    console.log("Error", e);
-    throw new Error(`Failed: ${e}`);
+    if (axios.isAxiosError(e) && e.response) {
+      throw new Error(e.response.data.message || "Failed to create invoice");
+    }
+    throw new Error("Failed to create invoice");
   }
 };
 
 export const getInvoice = async ({ requestId }: { requestId: string }) => {
-  const response = await fetch(`${baseURL}/invoices/${requestId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    console.log("Error Status", response.status);
+  try {
+    const response = await api.get(`/invoices/${requestId}`);
+    return {
+      data: response.data,
+      status: response.status,
+    };
+  } catch (e) {
+    if (axios.isAxiosError(e) && e.response) {
+      throw new Error(e.response.data.message || "Failed to get invoice");
+    }
     throw new Error("Failed to get invoice");
   }
-
-  return {
-    data: await response.json(),
-    status: response.status,
-  };
 };
 
 export const getInvoicePdf = async ({
@@ -54,45 +53,35 @@ export const getInvoicePdf = async ({
   invoiceDate: any;
   requestId: string;
 }) => {
-  const response = await fetch(
-    `
-    ${baseURL}/invoices-pdf?invoiceDate=${invoiceDate}&requestId=${requestId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  try {
+    const response = await api.get(
+      `/invoices-pdf?invoiceDate=${invoiceDate}&requestId=${requestId}`
+    );
+    return {
+      data: response.data,
+      status: response.status,
+    };
+  } catch (e) {
+    if (axios.isAxiosError(e) && e.response) {
+      throw new Error(e.response.data.message || "Failed to get invoice pdf");
     }
-  );
-  if (!response.ok) {
-    console.log("Error Status", response.status);
     throw new Error("Failed to get invoice pdf");
   }
-  return {
-    data: await response.json(),
-    status: response.status,
-  };
 };
 
 export const updateStatus = async ({ requestId }: { requestId: any }) => {
-  const response = await fetch(
-    `
-    ${baseURL}/invoices/${requestId}/update-status?status=2`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  try {
+    const response = await api.patch(
+      `/invoices/${requestId}/update-status?status=2`
+    );
+    return {
+      data: response.data,
+      status: response.status,
+    };
+  } catch (e) {
+    if (axios.isAxiosError(e) && e.response) {
+      throw new Error(e.response.data.message || "Failed to update status");
     }
-  );
-
-  if (!response.ok) {
-    console.log("Error Status", response.status);
     throw new Error("Failed to update status");
   }
-
-  return {
-    data: await response.json(),
-    status: response.status,
-  };
 };
